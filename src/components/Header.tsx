@@ -12,13 +12,16 @@ export function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreateAssetModalOpen, setIsCreateAssetModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error('Error signing out');
-    } else {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       toast.success('Signed out successfully');
+      setIsMenuOpen(false); // Close the menu after signing out
+    } catch (error: any) {
+      toast.error('Error signing out: ' + error.message);
     }
   };
 
@@ -64,19 +67,24 @@ export function Header() {
                   <button className="p-2 text-gray-600 hover:text-indigo-600">
                     <Bell className="h-5 w-5" />
                   </button>
-                  <div className="relative group">
-                    <button className="p-2 text-gray-600 hover:text-indigo-600">
+                  <div className="relative">
+                    <button 
+                      onClick={() => setIsMenuOpen(!isMenuOpen)}
+                      className="p-2 text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full"
+                    >
                       <User className="h-5 w-5" />
                     </button>
-                    <div className="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl hidden group-hover:block">
-                      <button
-                        onClick={handleSignOut}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-                      >
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </button>
-                    </div>
+                    {isMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-48 py-2 bg-white rounded-md shadow-xl ring-1 ring-black ring-opacity-5">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (

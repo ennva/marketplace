@@ -28,24 +28,49 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         });
         if (error) throw error;
         toast.success('Successfully logged in!');
+        onClose();
       } else {
-        // For development, we'll use signUp without email confirmation
-        const { error } = await supabase.auth.signUp({
+        // Sign up without email confirmation
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
             data: {
-              name: email.split('@')[0], // Use part of email as initial name
-            }
+              name: email.split('@')[0],
+            },
+            emailRedirectTo: window.location.origin,
           }
         });
-        if (error) throw error;
-        toast.success('Account created successfully! You can now sign in.');
-        setIsLogin(true); // Switch to login view after successful registration
+        
+        if (signUpError) throw signUpError;
+
+        // Ensure profile exists
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: signUpData.user!.id,
+            name: email.split('@')[0],
+            avatar_url: null,
+            rating: 0,
+            verified: false,
+          }, {
+            onConflict: 'id'
+          });
+
+        if (profileError) throw profileError;
+
+        // Sign in immediately after signup
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (signInError) throw signInError;
+        
+        toast.success('Account created and logged in successfully!');
+        onClose();
       }
-      onClose();
-    } catch (error) {
+    } catch (error: any) {
       toast.error(error.message);
     } finally {
       setLoading(false);
