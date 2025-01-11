@@ -45,10 +45,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               joined_at
             )
           `)
-          .or(`
-            title.ilike.%${debouncedQuery}%,
-            description.ilike.%${debouncedQuery}%
-          `)
+          .or(`title.ilike.%${debouncedQuery}%,description.ilike.%${debouncedQuery}%`)
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(5);

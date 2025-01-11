@@ -7,22 +7,32 @@ import { SearchModal } from './search/SearchModal';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
-export function Header() {
+interface HeaderProps {
+  onCategorySelect: (category: string) => void;
+}
+
+export function Header({ onCategorySelect }: HeaderProps) {
   const { user } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreateAssetModalOpen, setIsCreateAssetModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       toast.success('Signed out successfully');
-      setIsMenuOpen(false); // Close the menu after signing out
+      setIsMenuOpen(false);
     } catch (error: any) {
       toast.error('Error signing out: ' + error.message);
     }
+  };
+
+  const handleCategoryClick = (category: string) => {
+    setActiveCategory(category === activeCategory ? null : category);
+    onCategorySelect(category === activeCategory ? '' : category);
   };
 
   return (
@@ -33,18 +43,46 @@ export function Header() {
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-indigo-600">MarketPlace</h1>
               <nav className="hidden md:ml-8 md:flex md:space-x-8">
-                <a href="#" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                <button
+                  onClick={() => handleCategoryClick('website')}
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeCategory === 'website'
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                  }`}
+                >
                   Websites
-                </a>
-                <a href="#" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </button>
+                <button
+                  onClick={() => handleCategoryClick('app')}
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeCategory === 'app'
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                  }`}
+                >
                   Apps
-                </a>
-                <a href="#" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </button>
+                <button
+                  onClick={() => handleCategoryClick('domain')}
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeCategory === 'domain'
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                  }`}
+                >
                   Domains
-                </a>
-                <a href="#" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </button>
+                <button
+                  onClick={() => handleCategoryClick('saas')}
+                  className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                    activeCategory === 'saas'
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                  }`}
+                >
                   SaaS
-                </a>
+                </button>
               </nav>
             </div>
             
